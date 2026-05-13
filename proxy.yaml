@@ -1,0 +1,83 @@
+# nakshguard v1 configuration
+# reload without restart: kill -HUP <pid>
+#
+# OPTIONAL: to require auth on a shared network, set the env var
+#   NAKSHGUARD_AUTH_KEY=some-secret
+# then every request must send header: X-NakshGuard-Auth: some-secret
+# if unset, the proxy accepts all local requests (fine for an isolated host).
+
+version: "1.0"
+tier: "v1"
+
+global_settings:
+  # start here — detects loops but never blocks
+  # flip to false when you've reviewed shadow mode results
+  shadow_mode: false
+
+  # REQUIRED: where to forward requests.
+  # one proxy instance = one provider. set this to match your LLM.
+  #
+  #   OpenAI     →  https://api.openai.com         (default if left unset)
+  #   Anthropic  →  https://api.anthropic.com
+  #   Gemini     →  https://generativelanguage.googleapis.com
+  #   Groq       →  https://api.groq.com/openai
+  #   Ollama     →  http://localhost:11434
+  #   LiteLLM    →  http://localhost:4000          (if routing many providers)
+  #
+  # using more than one provider? run a separate proxy instance per provider,
+  # each on its own port with its own llm_target.
+  llm_target: "https://api.openai.com"
+
+  rate_limiter:
+    # requests per window — catches frequency-based loops instantly
+    max_requests: 20
+    window_seconds: 10
+
+# default limits applied to any agent not explicitly configured below
+default_limits:
+  # absolute ceiling on total tokens per session
+  # set this to ~10x your normal session usage
+  hard_token_limit: 100000
+
+  context_velocity:
+    # growth_rate: fires when tokens consistently grow across requests
+    # absolute: fires when tokens exceed a raw cap per time window
+    mode: "growth_rate"
+
+    # growth_rate mode settings
+    # 0.8 = fires when 80% of recent requests are growing in size
+    max_growth_rate: 0.8
+    min_samples: 5       # wait for this many samples before firing
+
+    # absolute mode settings (used when mode: "absolute")
+    # max_tokens_per_window: 10000
+    # window_seconds: 60
+
+  # repetition: catches an agent sending the IDENTICAL request over and over.
+  # this is the simplest loop - same request, same size, no token growth.
+  # CVE won't catch it (nothing grows) so this layer handles it directly.
+  repetition:
+    max_repeats: 5         # fire after the same request appears this many times
+    window_seconds: 60     # within this rolling window
+
+# per-agent configuration (optional)
+# each agent is matched by its X-Agent-ID header.
+# agents not listed here use default_limits above.
+# agents:
+#   "billing_bot":
+#     shadow_mode: false
+#     limits:
+#       hard_token_limit: 50000
+#       context_velocity:
+#         mode: "growth_rate"
+#         max_growth_rate: 0.8
+#         min_samples: 4
+#
+#   "batch_processor":
+#     shadow_mode: false
+#     limits:
+#       hard_token_limit: 500000
+#       context_velocity:
+#         mode: "absolute"
+#         max_tokens_per_window: 50000
+#         window_seconds: 60
