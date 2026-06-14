@@ -10,4 +10,4 @@ You need a commercial license if you want to:
   sequence analysis, cross-agent cycle detection, idempotency ledger
 - Avoid AGPL-3.0's source-sharing requirements
 
-See https://nakshguard.dev/pricing or email you@nakshguard.dev
+email pujanmirani2708@gmail.com
