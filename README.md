@@ -1,5 +1,4 @@
-# nakshguard
-
+# NakshGuard
 
 ![NakshGuard blocking a runaway agent loop](demo.gif)
 
