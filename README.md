@@ -125,7 +125,14 @@ python3 tests/run_all_tests.py   # integration tests (needs shadow_mode: false)
 
 One instance tracks hundreds of agents in memory. To run multiple instances
 behind a load balancer, route by `X-Agent-ID` so each agent maps to a
-consistent instance. Shared-state clustering is on the roadmap.
+consistent instance. Shared-state clustering is on the roadmap
+
+## Pro and Enterprise
+
+The open-source version handles the common loop patterns. Teams running many
+agents in production, or with on-prem compliance requirements, can get
+additional detection layers, priority support, and deployment help. Email
+pujanmirani2708@gmail.com if that's you.
 
 ## License
 
